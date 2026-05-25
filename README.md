@@ -33,6 +33,36 @@ Many projects **already have** an `AGENTS.md` containing:
 
 ---
 
+## Easiest Way: Use the Installer Script (Recommended for Most People)
+
+We provide safe, cross-platform installer scripts that handle everything for you:
+
+- Detect whether you already have an `AGENTS.md`
+- **Always create timestamped backups** before modifying anything
+- Append the demarcated Karpathy section (never duplicates)
+- Create the proper thin reference files for the agents you actually use
+- Work on Linux, macOS, Windows, WSL, and Git Bash
+
+### One-liner installation
+
+**Bash / zsh / Git Bash / WSL:**
+
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.sh)
+```
+
+**PowerShell (Windows, macOS, Linux):**
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex
+```
+
+The script will interactively ask which agents you use and do the right thing.
+
+Full documentation: [scripts/README.md](./scripts/README.md)
+
+---
+
 ## Recommended Approach: Composition Over Replacement
 
 We strongly recommend **appending** these behavioral guidelines into your existing `AGENTS.md` rather than replacing it.
@@ -138,7 +168,11 @@ The `.mdc` file uses `alwaysApply: true` and gives Cursor stronger structured co
 
 ## Quick Start Recipes
 
-### For an Existing Project That Already Has `AGENTS.md`
+### Recommended: Use the Installer Script
+
+See the [one-liner commands above](#easiest-way-use-the-installer-script-recommended-for-most-people). This is the safest and easiest method for almost everyone.
+
+### Manual: For an Existing Project That Already Has `AGENTS.md`
 
 ```bash
 # 1. Get the clean appendable block
@@ -148,7 +182,7 @@ curl -O https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/karp
 #    (use the BEGIN/END markers to keep it demarcated)
 ```
 
-### For a New Project
+### Manual: For a New Project
 
 ```bash
 curl -O https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/AGENTS.md
