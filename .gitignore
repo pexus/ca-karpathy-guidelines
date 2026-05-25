@@ -1,0 +1,14 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# IDE / Editor directories (do not commit personal settings)
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Optional: some people keep Cursor rules local only
+# .cursor/

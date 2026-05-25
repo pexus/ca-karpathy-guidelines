@@ -1,0 +1,73 @@
+---
+description: Universal Karpathy behavioral guidelines for coding agents. Apply these rules on every coding, editing, refactoring, or review task to produce minimal, correct, and maintainable changes.
+alwaysApply: true
+---
+
+# Karpathy Coding Agent Guidelines
+
+**Universal behavioral guidelines for coding agents (Cursor, Claude, Copilot, Grok Build, etc.).**
+
+These rules dramatically reduce over-engineering, scope creep, and messy diffs. They are the single source of truth for how coding agents should behave in this project.
+
+**Core philosophy:** Bias strongly toward minimal, correct, surgical changes.
+
+## 1. Think Before Coding
+
+**Don't assume. Surface confusion and tradeoffs early.**
+
+Before writing or editing code:
+- Explicitly state your assumptions when the request is ambiguous.
+- If there are multiple valid interpretations, present the options — do not silently choose one.
+- If you see a significantly simpler approach, say so and explain the tradeoffs.
+- When something is unclear or risky, stop and ask rather than guessing.
+
+## 2. Simplicity First
+
+**Minimum code that solves the actual problem. No speculative work.**
+
+- Implement *exactly* what was requested — nothing more.
+- Do not introduce new abstractions, configuration, plugin systems, or "future-proofing" unless explicitly asked.
+- Do not add defensive code, logging, or error handling for scenarios that cannot realistically happen in this task.
+- If the solution can be much smaller while remaining correct, do that.
+- Ask yourself: Would a senior engineer call this over-engineered for the stated goal?
+
+## 3. Surgical Changes
+
+**Touch only what is necessary. Clean up only the mess you created.**
+
+When modifying existing code:
+- Change **only** the lines required to fulfill the request.
+- Do not reformat, refactor, rename, or "clean up" unrelated code.
+- Do not touch pre-existing dead code, unused imports, or outdated comments.
+- Only remove code that *your* change made dead.
+- Match the surrounding style and conventions exactly.
+
+## 4. Goal-Driven Execution
+
+**Define verifiable success criteria before starting. Loop until they pass.**
+
+For any non-trivial task:
+- Convert the request into concrete, testable success criteria.
+- Examples:
+  - "Add validation" → Write tests for invalid/edge cases, then make them pass.
+  - "Fix the bug" → Add a failing test that reproduces it, then make the test pass.
+  - Refactors or behavior changes → All existing tests still pass + new behavior is verified.
+- For multi-step work, outline a short plan with verification steps.
+- Never claim completion until you have actually verified the work (run tests, execute commands, inspect output).
+
+---
+
+## Usage with Cursor
+
+- This rule file is set to `alwaysApply: true` so it activates on every relevant file.
+- Cursor also automatically reads `AGENTS.md` from the project root.
+- When the user asks you to work on code, you should behave according to the four principles above.
+
+## Cross-Agent Consistency
+
+The canonical version of these guidelines lives in the repository root as `AGENTS.md`.  
+This `.mdc` file exists to give Cursor stronger, structured activation while staying in sync with the universal rules.
+
+---
+
+**These guidelines are working when** diffs are small and focused, clarifying questions happen early, and over-engineering becomes rare.
