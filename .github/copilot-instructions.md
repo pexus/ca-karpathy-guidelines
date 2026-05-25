@@ -1,16 +1,17 @@
 # GitHub Copilot Instructions
 
-This project follows the universal Karpathy behavioral guidelines for coding agents.
+This project uses the **Karpathy Behavioral Guidelines** for coding agents.
 
-**Core rule:** Read and follow the guidelines defined in the repository root file [AGENTS.md](../../AGENTS.md) for every coding task.
+**Core rule:** Follow the demarcated "Karpathy Behavioral Guidelines" section inside the repository root file [AGENTS.md](../../AGENTS.md).
 
-The guidelines in `AGENTS.md` are the single source of truth. They cover:
-
+The guidelines cover:
 - Thinking before coding and surfacing assumptions/tradeoffs
 - Extreme simplicity — implement only what was explicitly requested
-- Surgical changes only — touch the minimum necessary code
+- Surgical changes only — touch the minimum necessary code, nothing unrelated
 - Goal-driven work with clear, verifiable success criteria before starting
 
-These principles apply whether you are working in VS Code with Copilot, or the user is using Claude Code, Cursor, Grok Build, or another agent.
+The pure, appendable version of the guidelines lives in [`karpathy-guidelines.md`](../../karpathy-guidelines.md).
 
-Project-specific instructions may be appended below this section when needed.
+These principles apply whether you are working via Copilot, Claude Code, Cursor, Grok Build, or any other agent.
+
+Project-specific instructions live in the main `AGENTS.md` file (above or below the Karpathy section).

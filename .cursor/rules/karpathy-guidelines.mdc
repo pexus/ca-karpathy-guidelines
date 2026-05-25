@@ -1,13 +1,13 @@
 ---
-description: Universal Karpathy behavioral guidelines for coding agents. Apply these rules on every coding, editing, refactoring, or review task to produce minimal, correct, and maintainable changes.
+description: Karpathy Behavioral Guidelines. Apply these rules on every coding, editing, refactoring, or review task. These are the universal behavioral guardrails for all agents working in this project.
 alwaysApply: true
 ---
 
-# Karpathy Coding Agent Guidelines
+# Karpathy Behavioral Guidelines (Cursor)
 
-**Universal behavioral guidelines for coding agents (Cursor, Claude, Copilot, Grok Build, etc.).**
+**Universal behavioral guidelines for coding agents.**
 
-These rules dramatically reduce over-engineering, scope creep, and messy diffs. They are the single source of truth for how coding agents should behave in this project.
+These rules are the same ones defined in the project's `AGENTS.md` (and available standalone in `karpathy-guidelines.md`).
 
 **Core philosophy:** Bias strongly toward minimal, correct, surgical changes.
 
@@ -27,7 +27,7 @@ Before writing or editing code:
 
 - Implement *exactly* what was requested — nothing more.
 - Do not introduce new abstractions, configuration, plugin systems, or "future-proofing" unless explicitly asked.
-- Do not add defensive code, logging, or error handling for scenarios that cannot realistically happen in this task.
+- Do not add defensive code, logging, or error handling for scenarios that cannot realistically happen.
 - If the solution can be much smaller while remaining correct, do that.
 - Ask yourself: Would a senior engineer call this over-engineered for the stated goal?
 
@@ -57,16 +57,11 @@ For any non-trivial task:
 
 ---
 
-## Usage with Cursor
+## How These Guidelines Relate to Your Project's AGENTS.md
 
-- This rule file is set to `alwaysApply: true` so it activates on every relevant file.
-- Cursor also automatically reads `AGENTS.md` from the project root.
-- When the user asks you to work on code, you should behave according to the four principles above.
+The canonical home for these rules is the demarcated section inside your project's root `AGENTS.md`.
 
-## Cross-Agent Consistency
-
-The canonical version of these guidelines lives in the repository root as `AGENTS.md`.  
-This `.mdc` file exists to give Cursor stronger, structured activation while staying in sync with the universal rules.
+This `.cursor/rules/karpathy-guidelines.mdc` file exists to give Cursor stronger, always-on structured enforcement (`alwaysApply: true`) while staying in sync with the universal guidelines that also apply to Claude Code, Copilot, Grok Build, and other agents.
 
 ---
 

@@ -1,30 +1,14 @@
-# AGENTS.md
+# Karpathy Behavioral Guidelines for Coding Agents
 
-This file contains instructions and behavioral guidelines for all coding agents working in this project (Grok Build, Claude Code, Cursor, GitHub Copilot, etc.).
+**These are the core behavioral rules.** They are designed to be **appended** to an existing `AGENTS.md` (or equivalent) file in your project.
 
----
-
-## Project-Specific Rules
-
-> **Replace or extend this section** with your own project's conventions, tech stack rules, testing requirements, architecture decisions, etc.
-
-Examples of what belongs here:
-- Preferred libraries and forbidden patterns
-- Testing strategy and coverage expectations
-- Code style and formatting rules
-- Architecture decisions (e.g., "prefer server components", "all data mutations go through server actions")
-- Review checklist items
-
-Add your rules below this line:
+Copy everything below the line and paste it into your `AGENTS.md` under a clear section heading.
 
 ---
-
-<!-- This is an EXAMPLE of how to include the Karpathy guidelines in a larger AGENTS.md file -->
-
-## Karpathy Behavioral Guidelines
 
 <!-- BEGIN karpathy-guidelines -->
-<!-- Source: https://github.com/pexus/ca-karpathy-guidelines -->
+
+## Karpathy Behavioral Guidelines
 
 These rules dramatically improve the quality of code produced by LLMs (Claude Code, Cursor, GitHub Copilot, Grok Build, Aider, etc.). They are inspired by principles popularized by Andrej Karpathy.
 
@@ -81,23 +65,3 @@ For any non-trivial task:
 - Completed work rarely needs follow-up fixes for unrelated changes
 
 <!-- END karpathy-guidelines -->
-
----
-
-## Agent-Specific Notes
-
-### Grok Build
-Grok Build natively discovers `AGENTS.md` (and `Claude.md` / `AGENT.md` variants) from the project root.
-
-### Claude Code
-Claude Code automatically loads `CLAUDE.md` at the start of every session. You can keep a thin `CLAUDE.md` that points here, or use a symlink.
-
-### Cursor
-Cursor reads this `AGENTS.md` file. For even stronger enforcement you can also maintain `.cursor/rules/` files.
-
-### GitHub Copilot
-Copilot reads `.github/copilot-instructions.md`. Many teams keep a thin reference file there that points to this `AGENTS.md`.
-
----
-
-*This example file shows one recommended way to compose the Karpathy behavioral guidelines with your own project rules. See the README for more composition strategies.*
