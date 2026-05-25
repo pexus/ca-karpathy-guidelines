@@ -2,7 +2,7 @@
 
 **Universal behavioral guidelines for coding agents** — inspired by principles popularized by Andrej Karpathy and refined through real-world use across many teams.
 
-These rules help Claude Code, GitHub Copilot, Cursor, Grok Build, Aider, and other agents produce dramatically better results: smaller focused diffs, much less over-engineering, fewer surprise refactors, and more reliable outcomes.
+These rules help **Claude Code, GitHub Copilot, Cursor, and Grok Build** produce dramatically better results: smaller focused diffs, much less over-engineering, fewer surprise refactors, and more reliable outcomes.
 
 ## The Core Problem This Solves
 

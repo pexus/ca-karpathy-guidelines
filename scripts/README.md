@@ -13,35 +13,53 @@ These scripts make it **safe and updatable** to add the Karpathy Behavioral Guid
 
 ## Recommended One-Liners
 
+Copy and paste **one line at a time**.
+
 ### Bash / zsh / Git Bash / WSL
 
-```bash
-# Interactive (recommended first time)
-bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.sh)
+**Interactive (recommended for first time):**
 
-# Non-interactive examples
-curl -sL .../install.sh | bash -s -- --agents all --yes
-curl -sL .../install.sh | bash -s -- --agents grok,claude,cursor
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.sh)
+```
+
+**Non-interactive — all four agents (Grok Build, Claude, Cursor, Copilot):**
+
+```bash
+curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.sh | bash -s -- --agents all --yes
+```
+
+**Non-interactive — specific agents only:**
+
+```bash
+curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.sh | bash -s -- --agents grok,claude,cursor
 ```
 
 ### PowerShell (Windows, macOS, Linux)
 
-```powershell
-# Interactive
-iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex
+**Interactive:**
 
-# Non-interactive
-iwr -useb .../install.ps1 | iex -Args "--agents", "all"
-iwr -useb .../install.ps1 | iex -Args "--agents", "claude,cursor"
+```powershell
+iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex
 ```
 
-### Windows CMD (simple wrapper)
+**Non-interactive — all four agents:**
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex -Args "--agents","all"
+```
+
+**Non-interactive — specific agents:**
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex -Args "--agents","grok,claude,cursor"
+```
+
+### Windows CMD
 
 ```cmd
-curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.bat | cmd
+curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.bat -o install.bat && install.bat
 ```
-
-Or download `install.bat` and run it.
 
 ---
 
@@ -73,7 +91,7 @@ bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/m
 
 **PowerShell:**
 ```powershell
-iwr -useb .../verify.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/verify.ps1 | iex
 ```
 
 The verifier:
@@ -126,9 +144,8 @@ If you have cloned the repo:
 
 ## Future Ideas
 
-- Support for additional agents (Windsurf, Cline, Aider, etc.)
-- Ability to also inject the guidelines into a specific subdirectory's `AGENTS.md`
-- Dry-run mode
+- Dry-run / preview mode before making changes
+- Ability to target a specific subdirectory’s `AGENTS.md`
 
 Contributions welcome.
 

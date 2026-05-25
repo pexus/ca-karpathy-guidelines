@@ -26,7 +26,7 @@ Add your rules below this line:
 <!-- BEGIN karpathy-guidelines -->
 <!-- Source: https://github.com/pexus/ca-karpathy-guidelines -->
 
-These rules dramatically improve the quality of code produced by LLMs (Claude Code, Cursor, GitHub Copilot, Grok Build, Aider, etc.). They are inspired by principles popularized by Andrej Karpathy.
+These rules dramatically improve the quality of code produced by LLMs (Claude Code, Cursor, GitHub Copilot, Grok Build, and similar agents). They are inspired by principles popularized by Andrej Karpathy.
 
 **Core philosophy:** Bias toward minimal, correct, surgical changes rather than clever or speculative solutions.
 

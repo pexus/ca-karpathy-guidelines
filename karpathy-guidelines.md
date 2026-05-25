@@ -10,7 +10,7 @@ Copy everything below the line and paste it into your `AGENTS.md` under a clear 
 
 ## Karpathy Behavioral Guidelines
 
-These rules dramatically improve the quality of code produced by LLMs (Claude Code, Cursor, GitHub Copilot, Grok Build, Aider, etc.). They are inspired by principles popularized by Andrej Karpathy.
+These rules dramatically improve the quality of code produced by LLMs (Claude Code, Cursor, GitHub Copilot, Grok Build, and similar agents). They are inspired by principles popularized by Andrej Karpathy.
 
 **Core philosophy:** Bias toward minimal, correct, surgical changes rather than clever or speculative solutions.
 
