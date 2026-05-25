@@ -1,92 +1,135 @@
 # Installation Scripts
 
-These scripts make it easy and **safe** to add the Karpathy Behavioral Guidelines to an existing project — even if you already have a complex `AGENTS.md`.
+These scripts make it **safe and updatable** to add the Karpathy Behavioral Guidelines to any project — even if you already have a complex `AGENTS.md`.
 
-## Safety Guarantees
+## Key Improvements (v2)
 
-Both scripts are designed with safety first:
+- **True idempotency + updates**: If the guidelines already exist (even an older version), the scripts **replace** the demarcated section instead of appending again.
+- **Non-interactive support**: Use `--agents` flag for CI, automation, or scripts.
+- **Always creates timestamped backups** before any change.
+- **Verify scripts** included for humans and CI pipelines.
 
-- **Always creates timestamped backups** before touching any file.
-  - Backups go into `.karpathy-backups/YYYYMMDD-HHMMSS-...`
-- Never overwrites an existing Karpathy section (detected via `<!-- BEGIN karpathy-guidelines -->` markers).
-- Idempotent — safe to run multiple times.
-- Works whether or not you're inside a git repository.
+---
 
-## Recommended Usage (One-Liner)
+## Recommended One-Liners
 
-### Bash / zsh / Git Bash / WSL (Linux & macOS)
+### Bash / zsh / Git Bash / WSL
 
 ```bash
+# Interactive (recommended first time)
 bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.sh)
+
+# Non-interactive examples
+curl -sL .../install.sh | bash -s -- --agents all --yes
+curl -sL .../install.sh | bash -s -- --agents grok,claude,cursor
 ```
 
 ### PowerShell (Windows, macOS, Linux)
 
 ```powershell
+# Interactive
 iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex
+
+# Non-interactive
+iwr -useb .../install.ps1 | iex -Args "--agents", "all"
+iwr -useb .../install.ps1 | iex -Args "--agents", "claude,cursor"
 ```
 
-## What the Scripts Do
+### Windows CMD (simple wrapper)
 
-1. Ask which coding agents you use:
-   - Grok Build
-   - Claude Code
-   - Cursor
-   - GitHub Copilot
+```cmd
+curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.bat | cmd
+```
 
-2. Create or update `AGENTS.md`:
-   - If the file doesn't exist → creates a minimal one with the guidelines appended.
-   - If it exists → appends the demarcated Karpathy section (unless already present).
+Or download `install.bat` and run it.
 
-3. Creates thin reference files for the agents you selected:
-   - `CLAUDE.md`
-   - `.github/copilot-instructions.md`
-   - `.cursor/rules/karpathy-guidelines.mdc` (the stronger Cursor format)
+---
 
-4. Backs up every file it modifies with a timestamp.
-
-## After Running the Script
+## Command Line Options (Bash)
 
 ```bash
-# Review what changed
-git status
-git diff AGENTS.md
-
-# Stage and commit (recommended)
-git add AGENTS.md CLAUDE.md .github .cursor 2>/dev/null || true
-git commit -m "docs: add Karpathy behavioral guidelines for coding agents"
+--agents grok,claude,cursor,copilot,all     # Comma-separated list
+--yes, -y                                   # Assume yes to all prompts
+--help
 ```
 
-## Manual / Offline Usage
+## Command Line Options (PowerShell)
 
-If you already cloned this repo:
+```powershell
+-Agents "grok,claude,cursor"     # String, supports "all"
+-Yes                             # Skip confirmation prompts
+```
 
+---
+
+## Verify Scripts (Highly Recommended)
+
+After installation (or in CI), run the verifier:
+
+**Bash:**
 ```bash
-# From inside your project
-/path/to/ca-karpathy-guidelines/scripts/install.sh
-
-# or on Windows
-pwsh /path/to/ca-karpathy-guidelines/scripts/install.ps1
+bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/verify.sh)
 ```
 
-## How It Detects Existing Guidelines
+**PowerShell:**
+```powershell
+iwr -useb .../verify.ps1 | iex
+```
 
-The scripts look for this marker:
+The verifier:
+- Checks that `AGENTS.md` contains the demarcated Karpathy section
+- Reports status of thin reference files
+- Exits with code `1` if critical items are missing (useful for CI)
+
+---
+
+## How Replacement Works
+
+The scripts look for these markers:
 
 ```markdown
 <!-- BEGIN karpathy-guidelines -->
+... old content ...
+<!-- END karpathy-guidelines -->
 ```
 
-If this comment exists anywhere in the target file, the script will refuse to append again. This prevents duplication even if you have custom headings.
+If found → the **entire block is replaced** with the latest version from the repository.
 
-## Advanced: Running Non-Interactively
+This means:
+- You can safely re-run the installer in the future when guidelines improve.
+- No duplicate sections will ever be created.
+- Your surrounding project-specific rules in `AGENTS.md` are preserved.
 
-Currently the scripts are interactive (they ask which agents you use). Non-interactive flags may be added in the future.
+---
 
-For now, you can still use them in CI or automation by pre-creating the files you need and running the script (it will skip files that already have the markers).
+## Safety Model
 
-## Contributing
+1. Every modified file is backed up to `.karpathy-backups/<timestamp>-filename` **before** any change.
+2. The demarcated section is the only thing that ever gets modified by these tools.
+3. The scripts are intentionally conservative.
 
-Improvements to cross-platform behavior, better Windows support, or additional agent shims are very welcome.
+---
 
-See the main [README](../README.md) for the overall philosophy of this project.
+## Local / Offline Usage
+
+If you have cloned the repo:
+
+```bash
+# From your project root
+/path/to/ca-karpathy-guidelines/scripts/install.sh --agents all
+
+# Verify
+/path/to/ca-karpathy-guidelines/scripts/verify.sh
+```
+
+---
+
+## Future Ideas
+
+- Support for additional agents (Windsurf, Cline, Aider, etc.)
+- Ability to also inject the guidelines into a specific subdirectory's `AGENTS.md`
+- Dry-run mode
+
+Contributions welcome.
+
+See the main [README](../README.md) for philosophy and background.

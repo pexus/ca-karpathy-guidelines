@@ -39,9 +39,12 @@ We provide safe, cross-platform installer scripts that handle everything for you
 
 - Detect whether you already have an `AGENTS.md`
 - **Always create timestamped backups** before modifying anything
-- Append the demarcated Karpathy section (never duplicates)
+- **Replace** the existing Karpathy section if present (even old versions) — true idempotency + future-proof updates
 - Create the proper thin reference files for the agents you actually use
+- Support both interactive and non-interactive (`--agents`) usage
 - Work on Linux, macOS, Windows, WSL, and Git Bash
+
+After running, you can also run the `verify` script (useful in CI or to check status).
 
 ### One-liner installation
 
@@ -163,6 +166,20 @@ curl -o .cursor/rules/karpathy-guidelines.mdc \
 ```
 
 The `.mdc` file uses `alwaysApply: true` and gives Cursor stronger structured control.
+
+---
+
+## Keeping Guidelines Up to Date
+
+Because the installer scripts **replace** the demarcated section instead of appending, you can safely re-run the installer in the future when the Karpathy guidelines are improved.
+
+We also provide `verify` scripts that are useful in CI pipelines:
+
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/verify.sh)
+```
+
+See [scripts/README.md](./scripts/README.md) for all options.
 
 ---
 

@@ -1,103 +1,92 @@
 <#
 .SYNOPSIS
-    ca-karpathy-guidelines installer for PowerShell (Windows, macOS, Linux)
+    Karpathy Guidelines Installer (v2) - PowerShell edition
 
 .DESCRIPTION
-    Safely appends the Karpathy Behavioral Guidelines into an existing (or new)
-    AGENTS.md file and creates thin reference files for chosen coding agents.
+    Safely installs or UPDATES the Karpathy Behavioral Guidelines.
+    - Always creates timestamped backups
+    - Replaces existing demarcated section (supports updating old versions)
+    - Supports interactive and non-interactive mode
 
-    Always creates timestamped backups before modifying any files.
+.EXAMPLE
+    # Interactive
+    iwr -useb https://.../install.ps1 | iex
 
-.USAGE
-    From PowerShell:
-        iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex
-
-    Or locally:
-        .\scripts\install.ps1
+    # Non-interactive
+    iwr -useb https://.../install.ps1 | iex -Args "--agents", "grok,claude,cursor"
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [string]$Agents,
+    [switch]$Yes
+)
 
 $ErrorActionPreference = 'Stop'
-$ProgressPreference = 'SilentlyContinue'
-
 $RepoRawUrl = "https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main"
 $GuidelinesUrl = "$RepoRawUrl/karpathy-guidelines.md"
+$CursorMdcUrl = "$RepoRawUrl/.cursor/rules/karpathy-guidelines.mdc"
 $BackupDir = ".karpathy-backups"
 
-function Write-Info    { Write-Host "[INFO]  " -ForegroundColor Cyan -NoNewline; Write-Host $args }
-function Write-Success { Write-Host "[OK]    " -ForegroundColor Green -NoNewline; Write-Host $args }
-function Write-Warn    { Write-Host "[WARN]  " -ForegroundColor Yellow -NoNewline; Write-Host $args }
-function Write-Error2  { Write-Host "[ERROR] " -ForegroundColor Red -NoNewline; Write-Host $args }
+function Write-Info    { Write-Host "[INFO]  " -NoNewline -ForegroundColor Cyan; Write-Host $args }
+function Write-Success { Write-Host "[OK]    " -NoNewline -ForegroundColor Green; Write-Host $args }
+function Write-Warn    { Write-Host "[WARN]  " -NoNewline -ForegroundColor Yellow; Write-Host $args }
+function Write-Error2  { Write-Host "[ERROR] " -NoNewline -ForegroundColor Red; Write-Host $args }
 
-# --- Safety Checks ----------------------------------------------------------------
+# --- Argument Handling -----------------------------------------------------------
+$NonInteractive = $false
+if ($Agents) { $NonInteractive = $true }
 
-if (-not (Test-Path .git -PathType Container)) {
-    Write-Warn "This directory does not appear to be a git repository."
-    $continue = Read-Host "Continue anyway? [y/N]"
-    if ($continue -notmatch '^[Yy]') {
-        Write-Info "Aborted by user."
-        exit 0
+# --- Safety ----------------------------------------------------------------------
+if (-not (Test-Path .git)) {
+    Write-Warn "Not a git repository."
+    if (-not $Yes) {
+        $ans = Read-Host "Continue anyway? [y/N]"
+        if ($ans -notmatch '^[Yy]') { exit 0 }
     }
 }
 
-# Create backup directory
 New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $BackupPrefix = Join-Path $BackupDir $Timestamp
+Write-Info "Backups will be saved to: $BackupPrefix"
 
-Write-Info "Backup directory: $BackupPrefix"
-
-# --- Download Guidelines ------------------------------------------------------------
-
-Write-Info "Fetching latest karpathy-guidelines.md ..."
+# --- Download --------------------------------------------------------------------
+Write-Info "Fetching latest guidelines..."
 
 try {
-    $GuidelinesContent = Invoke-RestMethod -Uri $GuidelinesUrl -ErrorAction Stop
+    $GuidelinesContent = Invoke-RestMethod -Uri $GuidelinesUrl
 } catch {
-    Write-Error2 "Failed to download guidelines from GitHub."
-    Write-Error2 "Please check your internet connection."
+    Write-Error2 "Failed to download guidelines."
     exit 1
 }
 
-# Extract the demarcated section using regex
 $pattern = '(?s)<!-- BEGIN karpathy-guidelines -->.*?<!-- END karpathy-guidelines -->'
 $GuidelinesSection = [regex]::Match($GuidelinesContent, $pattern).Value
 
-if ([string]::IsNullOrWhiteSpace($GuidelinesSection)) {
-    Write-Error2 "Could not extract the demarcated guidelines section."
+if (-not $GuidelinesSection) {
+    Write-Error2 "Could not extract demarcated section."
     exit 1
 }
 
-# --- Helper Functions ---------------------------------------------------------------
-
+# --- Core Function: Replace or Append (Idempotent + Updatable) -------------------
 function Backup-File {
     param([string]$Path)
     if (Test-Path $Path -PathType Leaf) {
-        $fileName = Split-Path $Path -Leaf
-        $backupPath = "$BackupPrefix-$fileName"
-        Copy-Item $Path $backupPath -Force
-        Write-Success "Backed up: $Path → $backupPath"
-        return $backupPath
+        $backup = "$BackupPrefix-$(Split-Path $Path -Leaf)"
+        Copy-Item $Path $backup -Force
+        Write-Success "Backed up: $Path"
     }
-    return $null
 }
 
-function Has-KarpathySection {
-    param([string]$Path)
-    if (Test-Path $Path) {
-        return (Select-String -Path $Path -Pattern "BEGIN karpathy-guidelines" -Quiet)
-    }
-    return $false
-}
-
-function Append-ToFile {
+function Upsert-KarpathySection {
     param(
         [string]$Path,
-        [string]$Content,
+        [string]$NewContent,
         [string]$Heading = "Karpathy Behavioral Guidelines"
     )
+
+    Backup-File -Path $Path
 
     if (-not (Test-Path $Path)) {
         $dir = Split-Path $Path -Parent
@@ -105,188 +94,169 @@ function Append-ToFile {
         @"
 # $(Split-Path $Path -Leaf)
 
-This file contains instructions for coding agents working in this project.
+This file contains instructions for coding agents.
 
 "@ | Set-Content -Path $Path -Encoding UTF8
-        Write-Info "Created new file: $Path"
+        Write-Info "Created $Path"
     }
 
-    if (Has-KarpathySection -Path $Path) {
-        Write-Warn "$Path already contains the Karpathy guidelines. Skipping."
-        return
-    }
+    $content = Get-Content $Path -Raw
 
-    $appendText = @"
+    if ($content -match 'BEGIN karpathy-guidelines') {
+        # Replace existing block (this is the key improvement)
+        $replacement = "## $Heading`r`n`r`n$NewContent`r`n"
+        $newContent = [regex]::Replace(
+            $content,
+            '(?s)## Karpathy Behavioral Guidelines.*?<!-- END karpathy-guidelines -->',
+            $replacement,
+            'IgnoreCase'
+        )
 
-
-## $Heading
-
-$Content
-
-"@
-
-    Add-Content -Path $Path -Value $appendText -Encoding UTF8
-    Write-Success "Appended Karpathy guidelines to $Path"
-}
-
-function Create-ThinReference {
-    param(
-        [string]$Path,
-        [string]$Target,
-        [string]$AgentName
-    )
-
-    $dir = Split-Path $Path -Parent
-    if ($dir) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-
-    if (Test-Path $Path) {
-        if (Select-String -Path $Path -Pattern "karpathy" -Quiet) {
-            Write-Warn "$Path already references Karpathy guidelines. Skipping."
-            return
+        # Fallback if the heading was different
+        if ($newContent -eq $content) {
+            $newContent = [regex]::Replace(
+                $content,
+                '(?s)<!-- BEGIN karpathy-guidelines -->.*?<!-- END karpathy-guidelines -->',
+                $NewContent
+            )
         }
-        Backup-File -Path $Path | Out-Null
-    }
 
-    $content = @"
-# $(Split-Path $Path -Leaf)
-
-This project uses the Karpathy Behavioral Guidelines for coding agents.
-
-**Please follow the demarcated "Karpathy Behavioral Guidelines" section in [$Target](./$Target).**
-
-The pure guidelines are also available in ``karpathy-guidelines.md`` at the root of this repository.
-
-These rules apply when using $AgentName.
-"@
-
-    Set-Content -Path $Path -Value $content -Encoding UTF8
-    Write-Success "Created/updated thin reference: $Path"
-}
-
-# --- User Interaction ---------------------------------------------------------------
-
-Write-Host ""
-Write-Info "=== Karpathy Guidelines Installer (PowerShell) ==="
-Write-Host ""
-
-$AgentsFile = "AGENTS.md"
-
-if (Test-Path $AgentsFile) {
-    Write-Info "Found existing $AgentsFile"
-} else {
-    Write-Info "No $AgentsFile found in current directory."
-}
-
-Write-Host ""
-Write-Info "Which coding agents / environments do you use in this project?"
-Write-Host "Enter numbers separated by commas or spaces (e.g. 1,3,4), or 'a' for all:"
-Write-Host ""
-Write-Host "  1) Grok Build"
-Write-Host "  2) Claude Code"
-Write-Host "  3) Cursor"
-Write-Host "  4) GitHub Copilot"
-Write-Host "  5) None / I'll configure later"
-Write-Host ""
-
-$input = Read-Host "Your choice"
-
-$selectedGrok = $false
-$selectedClaude = $false
-$selectedCursor = $false
-$selectedCopilot = $false
-
-$choices = $input -split '[, ]+' | Where-Object { $_ -ne '' }
-
-if ($choices -contains 'a' -or $choices -contains 'A') {
-    $selectedGrok = $true
-    $selectedClaude = $true
-    $selectedCursor = $true
-    $selectedCopilot = $true
-} else {
-    foreach ($c in $choices) {
-        switch ($c) {
-            '1' { $selectedGrok = $true }
-            '2' { $selectedClaude = $true }
-            '3' { $selectedCursor = $true }
-            '4' { $selectedCopilot = $true }
-            '5' { } # none
-            default { Write-Warn "Unknown option: $c" }
-        }
+        Set-Content -Path $Path -Value $newContent -Encoding UTF8 -NoNewline
+        Write-Success "Updated existing Karpathy section in $Path (replaced with latest version)"
+    } else {
+        # Append
+        $append = "`r`n`r`n## $Heading`r`n`r`n$NewContent`r`n"
+        Add-Content -Path $Path -Value $append -Encoding UTF8
+        Write-Success "Appended Karpathy guidelines to $Path"
     }
 }
 
-# --- Main Execution -----------------------------------------------------------------
+# --- Agent Selection -------------------------------------------------------------
+function Get-SelectedAgents {
+    param([string]$Spec)
 
-Write-Host ""
-Write-Info "Starting installation..."
+    $selected = @{
+        Grok = $false
+        Claude = $false
+        Cursor = $false
+        Copilot = $false
+    }
 
-# Backup and append to AGENTS.md
-if (Test-Path $AgentsFile) {
-    Backup-File -Path $AgentsFile | Out-Null
-}
+    if (-not $Spec) {
+        # Interactive
+        Write-Host ""
+        Write-Info "Which coding agents do you use?"
+        Write-Host "  1) Grok Build"
+        Write-Host "  2) Claude Code"
+        Write-Host "  3) Cursor"
+        Write-Host "  4) GitHub Copilot"
+        Write-Host "  5) None"
+        Write-Host ""
+        $input = Read-Host "Enter numbers or 'a' for all"
 
-if (Has-KarpathySection -Path $AgentsFile) {
-    Write-Warn "$AgentsFile already contains the Karpathy section."
-} else {
-    Append-ToFile -Path $AgentsFile -Content $GuidelinesSection -Heading "Karpathy Behavioral Guidelines"
-}
-
-# Thin references
-if ($selectedClaude) {
-    Create-ThinReference -Path "CLAUDE.md" -Target "AGENTS.md" -AgentName "Claude Code"
-}
-
-if ($selectedCopilot) {
-    Create-ThinReference -Path ".github/copilot-instructions.md" -Target "AGENTS.md" -AgentName "GitHub Copilot"
-}
-
-if ($selectedCursor) {
-    $cursorRule = ".cursor/rules/karpathy-guidelines.mdc"
-    $cursorDir = Split-Path $cursorRule -Parent
-
-    if (Test-Path $cursorRule) {
-        if (Select-String -Path $cursorRule -Pattern "karpathy" -Quiet) {
-            Write-Warn "$cursorRule already contains Karpathy content. Skipping."
+        if ($input -match '^[aA]') {
+            $selected.Grok = $selected.Claude = $selected.Cursor = $selected.Copilot = $true
         } else {
-            Backup-File -Path $cursorRule | Out-Null
+            foreach ($c in ($input -split '[, ]')) {
+                switch ($c.Trim()) {
+                    '1' { $selected.Grok = $true }
+                    '2' { $selected.Claude = $true }
+                    '3' { $selected.Cursor = $true }
+                    '4' { $selected.Copilot = $true }
+                }
+            }
+        }
+    } else {
+        # Non-interactive
+        $lower = $Spec.ToLower()
+        if ($lower -eq 'all') {
+            $selected.Grok = $selected.Claude = $selected.Cursor = $selected.Copilot = $true
+        } else {
+            foreach ($p in ($lower -split '[, ]')) {
+                switch ($p.Trim()) {
+                    { $_ -in 'grok','groq' }   { $selected.Grok = $true }
+                    'claude'                  { $selected.Claude = $true }
+                    'cursor'                  { $selected.Cursor = $true }
+                    { $_ -in 'copilot','github' } { $selected.Copilot = $true }
+                }
+            }
         }
     }
+    return $selected
+}
 
-    New-Item -ItemType Directory -Path $cursorDir -Force | Out-Null
+$selected = Get-SelectedAgents -Spec $Agents
+
+# --- Execution -------------------------------------------------------------------
+Write-Host ""
+Write-Info "Installing / Updating Karpathy Guidelines (safe + updatable mode)..."
+
+$agentsFile = "AGENTS.md"
+Upsert-KarpathySection -Path $agentsFile -NewContent $GuidelinesSection
+
+if ($selected.Claude) {
+    $path = "CLAUDE.md"
+    if ((Test-Path $path) -and (Select-String -Path $path -Pattern "karpathy" -Quiet)) {
+        Write-Warn "$path already references Karpathy guidelines."
+    } else {
+        Backup-File -Path $path
+        New-Item -ItemType Directory -Path (Split-Path $path) -Force | Out-Null
+        @"
+# CLAUDE.md
+
+This project uses the Karpathy Behavioral Guidelines.
+
+**Follow the demarcated section in [AGENTS.md](./AGENTS.md).**
+"@ | Set-Content -Path $path -Encoding UTF8
+        Write-Success "Created $path"
+    }
+}
+
+if ($selected.Copilot) {
+    $path = ".github/copilot-instructions.md"
+    if ((Test-Path $path) -and (Select-String -Path $path -Pattern "karpathy" -Quiet)) {
+        Write-Warn "$path already references Karpathy guidelines."
+    } else {
+        Backup-File -Path $path
+        New-Item -ItemType Directory -Path (Split-Path $path) -Force | Out-Null
+        @"
+# copilot-instructions.md
+
+This project uses the Karpathy Behavioral Guidelines.
+
+**Follow the demarcated section in [AGENTS.md](../../AGENTS.md).**
+"@ | Set-Content -Path $path -Encoding UTF8
+        Write-Success "Created $path"
+    }
+}
+
+if ($selected.Cursor) {
+    $path = ".cursor/rules/karpathy-guidelines.mdc"
+    Backup-File -Path $path
+    New-Item -ItemType Directory -Path (Split-Path $path) -Force | Out-Null
 
     try {
-        $mdcUrl = "$RepoRawUrl/.cursor/rules/karpathy-guidelines.mdc"
-        $mdcContent = Invoke-RestMethod -Uri $mdcUrl -ErrorAction Stop
-        Set-Content -Path $cursorRule -Value $mdcContent -Encoding UTF8
-        Write-Success "Installed Cursor rule: $cursorRule"
+        $mdc = Invoke-RestMethod -Uri $CursorMdcUrl
+        Set-Content -Path $path -Value $mdc -Encoding UTF8
+        Write-Success "Installed Cursor rule: $path"
     } catch {
-        Write-Warn "Could not download Cursor .mdc file. You can add it manually later."
+        Write-Warn "Failed to download Cursor .mdc file."
     }
 }
 
-# --- Summary ------------------------------------------------------------------------
-
+# --- Summary ---------------------------------------------------------------------
 Write-Host ""
-Write-Success "Installation complete!"
-Write-Host ""
-Write-Info "Backups saved in: $BackupDir\"
-Write-Host ""
+Write-Success "Installation complete."
+Write-Info "Backups: $BackupDir"
 
 if (Test-Path .git) {
-    Write-Host "Suggested next steps:"
+    Write-Host ""
+    Write-Host "Suggested commands:"
     Write-Host "  git status"
-    Write-Host "  git diff $AgentsFile"
-    Write-Host '  git add $AgentsFile CLAUDE.md .github .cursor 2>$null'
-    Write-Host '  git commit -m "docs: add Karpathy behavioral guidelines for coding agents"'
+    Write-Host "  git diff $agentsFile"
+    Write-Host "  git add $agentsFile CLAUDE.md .github .cursor"
+    Write-Host "  git commit -m 'docs: add/update Karpathy behavioral guidelines'"
 }
 
 Write-Host ""
-Write-Info "You can safely re-run this script. It will not duplicate existing sections."
-Write-Host ""
-
-if (Test-Path $AgentsFile) {
-    Write-Info "The Karpathy section is demarcated in $AgentsFile using:"
-    Write-Host "    <!-- BEGIN karpathy-guidelines -->"
-    Write-Host "    ... content ..."
-    Write-Host "    <!-- END karpathy-guidelines -->"
-}
+Write-Info "The Karpathy section is now demarcated and can be safely updated in the future."
