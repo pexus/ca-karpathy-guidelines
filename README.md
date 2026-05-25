@@ -35,34 +35,37 @@ Many projects **already have** an `AGENTS.md` containing:
 
 ## Easiest Way: Use the Installer Script (Recommended for Most People)
 
-We provide safe, cross-platform installer scripts that handle everything for you:
+We provide safe, cross-platform installer scripts that make adoption painless:
 
-- Detect whether you already have an `AGENTS.md`
-- **Always create timestamped backups** before modifying anything
-- **Replace** the existing Karpathy section if present (even old versions) — true idempotency + future-proof updates
-- Create the proper thin reference files for the agents you actually use
-- Support both interactive and non-interactive (`--agents`) usage
-- Work on Linux, macOS, Windows, WSL, and Git Bash
+- Work with existing `AGENTS.md` files (never blindly overwrites)
+- **Always create timestamped backups** before touching anything
+- **Replace** old versions of the guidelines when you re-run the script (true future-proof updates)
+- Set up thin reference files for the agents you actually use
+- Available as clean one-liners for Bash and PowerShell
 
-After running, you can also run the `verify` script (useful in CI or to check status).
+After installation, you can run the `verify` script anytime (great for CI or to confirm everything is in place).
 
 ### One-liner installation
 
-**Bash / zsh / Git Bash / WSL:**
+**Copy and paste one line at a time.**
+
+**Bash / zsh / Git Bash / WSL – Interactive (recommended first time):**
 
 ```bash
 bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.sh)
 ```
 
-**PowerShell (Windows, macOS, Linux):**
+**PowerShell (Windows, macOS, Linux) – Interactive:**
 
 ```powershell
 iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex
 ```
 
-The script will interactively ask which agents you use and do the right thing.
+The interactive version will ask which of the four agents you use (Grok Build, Claude Code, Cursor, GitHub Copilot) and set everything up safely.
 
-Full documentation: [scripts/README.md](./scripts/README.md)
+For non-interactive usage, specific agents only, or the `verify` script, see the full guide:
+
+→ **[scripts/README.md](./scripts/README.md)**
 
 ---
 
