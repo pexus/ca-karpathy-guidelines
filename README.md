@@ -61,7 +61,7 @@ bash <(curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/m
 iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.ps1 | iex
 ```
 
-The interactive version will ask which of the four agents you use (Grok Build, Claude Code, Cursor, GitHub Copilot) and set everything up safely.
+The interactive version will show a menu allowing you to select one or more agents (Grok Build, Claude Code, Cursor, GitHub Copilot). You can also choose **"5) All"** to proactively set up thin reference files for every supported agent at once.
 
 For non-interactive usage, specific agents only, or the `verify` script, see the full guide:
 

@@ -6,6 +6,7 @@ These scripts make it **safe and updatable** to add the Karpathy Behavioral Guid
 
 - **True idempotency + updates**: If the guidelines already exist (even an older version), the scripts **replace** the demarcated section instead of appending again.
 - **Non-interactive support**: Use `--agents` flag for CI, automation, or scripts.
+- **Improved interactive selection**: Clear menu with explicit "**5) All**" option to easily enable all agents at once.
 - **Always creates timestamped backups** before any change.
 - **Verify scripts** included for humans and CI pipelines.
 
@@ -60,6 +61,31 @@ iwr -useb https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/sc
 ```cmd
 curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scripts/install.bat -o install.bat && install.bat
 ```
+
+---
+
+## Interactive Agent Selection
+
+When running the installer interactively (the default one-liner), you will see this menu:
+
+```
+Which coding agents / environments do you use in this project?
+You can enter multiple numbers separated by space (e.g. 1 3), or choose one of the options below:
+
+  1) Grok Build
+  2) Claude Code
+  3) Cursor
+  4) GitHub Copilot
+  5) All (select everything above)
+  6) None
+```
+
+**Key behaviors:**
+- You can select **multiple agents** by typing numbers separated by spaces (example: `1 3 4`).
+- Type **`5`** or **`a`** (or `A`) to quickly select **All** four agents.
+- Choosing **All** is recommended if you use multiple coding agents, or if you want to proactively create the thin reference files (`CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/...`) even if those directories don't exist in your project yet.
+
+This makes it easy to set up your project for any combination of the supported agents.
 
 ---
 
