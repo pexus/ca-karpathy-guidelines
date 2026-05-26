@@ -66,7 +66,7 @@ curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scr
 ## Command Line Options (Bash)
 
 ```bash
---agents grok,claude,cursor,copilot,all     # Comma-separated list
+--agents grok,claude,cursor,copilot,all     # Comma-separated list (use "all" for everything)
 --yes, -y                                   # Assume yes to all prompts
 --help
 ```
@@ -74,7 +74,7 @@ curl -sL https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main/scr
 ## Command Line Options (PowerShell)
 
 ```powershell
--Agents "grok,claude,cursor"     # String, supports "all"
+-Agents "grok,claude,cursor"     # Comma-separated. Use "all" to select everything
 -Yes                             # Skip confirmation prompts
 ```
 

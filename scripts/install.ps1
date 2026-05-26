@@ -145,16 +145,19 @@ function Get-SelectedAgents {
     if (-not $Spec) {
         # Interactive
         Write-Host ""
-        Write-Info "Which coding agents do you use?"
+        Write-Info "Which coding agents do you use in this project?"
+        Write-Host "You can enter multiple numbers separated by space or comma (e.g. 1 3), or choose one of the options below:"
+        Write-Host ""
         Write-Host "  1) Grok Build"
         Write-Host "  2) Claude Code"
         Write-Host "  3) Cursor"
         Write-Host "  4) GitHub Copilot"
-        Write-Host "  5) None"
+        Write-Host "  5) All (select everything above)"
+        Write-Host "  6) None"
         Write-Host ""
-        $input = Read-Host "Enter numbers or 'a' for all"
+        $input = Read-Host "Your choice"
 
-        if ($input -match '^[aA]') {
+        if ($input -match '^[aA5]$') {
             $selected.Grok = $selected.Claude = $selected.Cursor = $selected.Copilot = $true
         } else {
             foreach ($c in ($input -split '[, ]')) {
@@ -163,6 +166,7 @@ function Get-SelectedAgents {
                     '2' { $selected.Claude = $true }
                     '3' { $selected.Cursor = $true }
                     '4' { $selected.Copilot = $true }
+                    '5' { $selected.Grok = $selected.Claude = $selected.Cursor = $selected.Copilot = $true }
                 }
             }
         }

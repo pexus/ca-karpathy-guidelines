@@ -178,18 +178,19 @@ select_agents() {
     if [[ -z "$spec" ]]; then
         # Interactive mode
         echo
-        log_info "Which coding agents / environments do you use?"
-        echo "Enter numbers separated by space (e.g. 1 3 4), or 'a' for all:"
+        log_info "Which coding agents / environments do you use in this project?"
+        echo "You can enter multiple numbers separated by space (e.g. 1 3), or choose one of the options below:"
         echo
         echo "  1) Grok Build"
         echo "  2) Claude Code"
         echo "  3) Cursor"
         echo "  4) GitHub Copilot"
-        echo "  5) None"
+        echo "  5) All (select everything above)"
+        echo "  6) None"
         echo
         read -r -p "Your choice: " choices
 
-        if [[ "$choices" == "a" || "$choices" == "A" ]]; then
+        if [[ "$choices" == "a" || "$choices" == "A" || "$choices" == "5" ]]; then
             SELECTED_GROK=true; SELECTED_CLAUDE=true
             SELECTED_CURSOR=true; SELECTED_COPILOT=true
         else
@@ -199,6 +200,7 @@ select_agents() {
                     2) SELECTED_CLAUDE=true ;;
                     3) SELECTED_CURSOR=true ;;
                     4) SELECTED_COPILOT=true ;;
+                    5) SELECTED_GROK=true; SELECTED_CLAUDE=true; SELECTED_CURSOR=true; SELECTED_COPILOT=true ;;
                 esac
             done
         fi
