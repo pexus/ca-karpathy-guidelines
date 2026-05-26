@@ -26,7 +26,7 @@ $ErrorActionPreference = 'Stop'
 $RepoRawUrl = "https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main"
 $GuidelinesUrl = "$RepoRawUrl/karpathy-guidelines.md"
 $CursorMdcUrl = "$RepoRawUrl/.cursor/rules/karpathy-guidelines.mdc"
-$BackupDir = ".karpathy-backups"
+$BackupDir = ".agents-backups"
 
 function Write-Info    { Write-Host "[INFO]  " -NoNewline -ForegroundColor Cyan; Write-Host $args }
 function Write-Success { Write-Host "[OK]    " -NoNewline -ForegroundColor Green; Write-Host $args }
@@ -37,19 +37,29 @@ function Write-Error2  { Write-Host "[ERROR] " -NoNewline -ForegroundColor Red; 
 $NonInteractive = $false
 if ($Agents) { $NonInteractive = $true }
 
-# --- Safety ----------------------------------------------------------------------
-if (-not (Test-Path .git)) {
-    Write-Warn "Not a git repository."
+# --- Safety & Backup Strategy ----------------------------------------------------
+$IsGitRepo = $false
+try {
+    git rev-parse --is-inside-work-tree 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) { $IsGitRepo = $true }
+} catch {}
+
+$UseFileBackups = -not $IsGitRepo
+
+if ($IsGitRepo) {
+    Write-Info "Git repository detected — relying on git for file recovery. No separate backups will be created."
+} else {
+    Write-Warn "This directory does not appear to be a git repository."
     if (-not $Yes) {
         $ans = Read-Host "Continue anyway? [y/N]"
         if ($ans -notmatch '^[Yy]') { exit 0 }
     }
-}
 
-New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
-$Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$BackupPrefix = Join-Path $BackupDir $Timestamp
-Write-Info "Backups will be saved to: $BackupPrefix"
+    New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
+    $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+    $BackupPrefix = Join-Path $BackupDir $Timestamp
+    Write-Info "Backups will be saved to: $BackupPrefix"
+}
 
 # --- Download --------------------------------------------------------------------
 Write-Info "Fetching latest guidelines..."
@@ -72,6 +82,11 @@ if (-not $GuidelinesSection) {
 # --- Core Function: Replace or Append (Idempotent + Updatable) -------------------
 function Backup-File {
     param([string]$Path)
+
+    if (-not $UseFileBackups) {
+        return
+    }
+
     if (Test-Path $Path -PathType Leaf) {
         $backup = "$BackupPrefix-$(Split-Path $Path -Leaf)"
         Copy-Item $Path $backup -Force
@@ -251,7 +266,11 @@ if ($selected.Cursor) {
 # --- Summary ---------------------------------------------------------------------
 Write-Host ""
 Write-Success "Installation complete."
-Write-Info "Backups: $BackupDir"
+if ($UseFileBackups) {
+    Write-Info "Backups saved in: $BackupDir"
+} else {
+    Write-Info "No file backups created (git repository detected)."
+}
 
 if (Test-Path .git) {
     Write-Host ""

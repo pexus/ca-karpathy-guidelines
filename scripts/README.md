@@ -7,7 +7,7 @@ These scripts make it **safe and updatable** to add the Karpathy Behavioral Guid
 - **True idempotency + updates**: If the guidelines already exist (even an older version), the scripts **replace** the demarcated section instead of appending again.
 - **Non-interactive support**: Use `--agents` flag for CI, automation, or scripts.
 - **Improved interactive selection**: Clear menu with explicit "**5) All**" option to easily enable all agents at once.
-- **Always creates timestamped backups** before any change.
+- Creates timestamped file backups **only when the project is not under git control**.
 - **Verify scripts** included for humans and CI pipelines.
 
 ---
@@ -148,9 +148,10 @@ This means:
 
 ## Safety Model
 
-1. Every modified file is backed up to `.karpathy-backups/<timestamp>-filename` **before** any change.
-2. The demarcated section is the only thing that ever gets modified by these tools.
-3. The scripts are intentionally conservative.
+- If the project is **under git**, we rely on git history for recovery — no extra backup folder is created.
+- If the project is **not** under git, we create timestamped backups in `.agents-backups/<timestamp>-filename` before modifying any files.
+- The demarcated Karpathy section is the only thing these scripts ever modify.
+- The scripts are intentionally conservative.
 
 ---
 

@@ -38,7 +38,7 @@ Many projects **already have** an `AGENTS.md` containing:
 We provide safe, cross-platform installer scripts that make adoption painless:
 
 - Work with existing `AGENTS.md` files (never blindly overwrites)
-- **Always create timestamped backups** before touching anything
+- Create timestamped file backups **only if the project is not under git** (we rely on git when available)
 - **Replace** old versions of the guidelines when you re-run the script (true future-proof updates)
 - Set up thin reference files for the agents you actually use
 - Available as clean one-liners for Bash and PowerShell

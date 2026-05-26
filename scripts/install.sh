@@ -25,7 +25,7 @@ set -euo pipefail
 REPO_RAW_URL="https://raw.githubusercontent.com/pexus/ca-karpathy-guidelines/main"
 GUIDELINES_URL="${REPO_RAW_URL}/karpathy-guidelines.md"
 CURSOR_MDC_URL="${REPO_RAW_URL}/.cursor/rules/karpathy-guidelines.mdc"
-BACKUP_DIR=".karpathy-backups"
+BACKUP_DIR=".agents-backups"
 
 # Colors
 RED='\033[0;31m'
@@ -69,8 +69,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# --- Safety Checks ---------------------------------------------------------------
-if [[ ! -d .git ]]; then
+# --- Safety Checks & Backup Strategy -------------------------------------------
+IS_GIT_REPO=false
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    IS_GIT_REPO=true
+fi
+
+USE_FILE_BACKUPS=true
+
+if $IS_GIT_REPO; then
+    USE_FILE_BACKUPS=false
+    log_info "Git repository detected — relying on git for file recovery. No separate backups will be created."
+else
     log_warn "This directory does not appear to be a git repository."
     if [[ "$ASSUME_YES" != true ]]; then
         read -r -p "Continue anyway? [y/N] " response
@@ -79,12 +89,12 @@ if [[ ! -d .git ]]; then
             exit 0
         fi
     fi
-fi
 
-mkdir -p "$BACKUP_DIR"
-TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
-BACKUP_PREFIX="${BACKUP_DIR}/${TIMESTAMP}"
-log_info "Backup directory: ${BACKUP_PREFIX}"
+    mkdir -p "$BACKUP_DIR"
+    TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+    BACKUP_PREFIX="${BACKUP_DIR}/${TIMESTAMP}"
+    log_info "Backup directory: ${BACKUP_PREFIX}"
+fi
 
 # --- Download Latest Guidelines --------------------------------------------------
 log_info "Fetching latest guidelines..."
@@ -104,6 +114,11 @@ fi
 # --- Core Logic: Replace or Append -----------------------------------------------
 backup_file() {
     local file="$1"
+
+    if ! $USE_FILE_BACKUPS; then
+        return 0
+    fi
+
     if [[ -f "$file" ]]; then
         local backup_path="${BACKUP_PREFIX}-$(basename "$file")"
         cp "$file" "$backup_path"
@@ -298,7 +313,12 @@ fi
 # --- Summary ---------------------------------------------------------------------
 echo
 log_success "Done!"
-log_info "Backups: $BACKUP_DIR/"
+
+if $USE_FILE_BACKUPS; then
+    log_info "Backups saved in: $BACKUP_DIR/"
+else
+    log_info "No file backups created (git repository detected)."
+fi
 
 if [[ -d .git ]]; then
     echo

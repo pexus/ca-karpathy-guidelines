@@ -12,3 +12,6 @@ Thumbs.db
 
 # Optional: some people keep Cursor rules local only
 # .cursor/
+
+# Backups created by agent guideline installers (when project is not under git)
+.agents-backups/
